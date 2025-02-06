@@ -1,0 +1,16 @@
+# Python関連
+__pycache__/
+*.pyc
+*.pyo
+
+# 仮想環境
+venv/
+env/
+
+# Django関連
+db.sqlite3
+media/
+
+# IDE関連
+.vscode/
+.idea/
