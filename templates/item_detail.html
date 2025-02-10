@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品詳細ページ</title>
+</head>
+<body>
+    <h1>商品一覧</h1>
+    <h2>{{ item.name }}</h2>
+    <p>価格: {{ item.price }}円</p>
+    <p>説明: {{ item.information }}</p>
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.name}}" width="200">
+    {% else %}
+      <p>イメージ画像はありません</p>
+    {% endif %}
+    <p>在庫数{{ item.stock }}</p>
+    {% if item.stock > 0 %}
+      <button>購入する</button>
+    {% else %}
+      <p>在庫がありません。入荷までもう少々お待ちください。</p>
+    {% endif %}
+    <a href="/index/">商品一覧ページに戻る</a>
+</body>
+</html>

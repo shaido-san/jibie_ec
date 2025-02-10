@@ -1,10 +1,8 @@
-import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 def upload_image_to(instance, filename):
-    unique_id = str(uuid.uuid4())
-    return f"images/{unique_id}/{filename}"
+    return f"images/{filename}"
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,9 +32,11 @@ class Address(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=100)
-    image = models.ImageField(default="", blank=True, upload_to=upload_image_to)
+    image = models.ImageField(upload_to=upload_image_to, blank=True, null=True)
+    price = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=False)
     information = models.TextField()
+    stock = models.PositiveIntegerField()
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
