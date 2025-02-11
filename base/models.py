@@ -48,6 +48,9 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
+    def subtotal(self):
+        return self.item.price * self.quantity
+
 # 注文情報
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会員登録ページ</title>
+</head>
+<body>
+    <h1>会員登録フォーム</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">会員登録する</button>
+    </form>
+    <a href="{% url 'login' %}">すでに会員登録している方はこちら。</a>
+</body>
+</html>
