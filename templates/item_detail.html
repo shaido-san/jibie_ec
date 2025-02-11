@@ -15,12 +15,16 @@
     {% else %}
       <p>イメージ画像はありません</p>
     {% endif %}
-    <p>在庫数{{ item.stock }}</p>
+    <p>在庫数:残り約{{ item.stock }}個</p>
     {% if item.stock > 0 %}
-      <button>購入する</button>
+      <form action="{% url 'add_to_cart' item.id %}">
+        <button type="submit">カートに追加する</button>
+      </form>
     {% else %}
       <p>在庫がありません。入荷までもう少々お待ちください。</p>
     {% endif %}
+
+    <a href="/cart/">カートを見る</a>
     <a href="/index/">商品一覧ページに戻る</a>
 </body>
 </html>
