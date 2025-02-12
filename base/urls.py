@@ -7,7 +7,7 @@ from .views import register, CustomLoginView, CustomLogoutView
 urlpatterns = [
     path("register/", register, name="register"),
     path("login/", CustomLoginView.as_view(), name="login"),
-    path("login", CustomLogoutView.as_view(), name="logout"),
+    path("logout", CustomLogoutView.as_view(next_page="login"), name="logout"),
     path("index/", views.index, name="index"),
     path("item/<int:item_id>/", views.item_detail, name="item_detail"),
     path("cart/", views.cart, name="cart"),

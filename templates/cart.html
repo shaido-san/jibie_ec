@@ -7,11 +7,16 @@
 </head>
 <body>
 {% if cart %}
-      {% for item_id, item in cart.items %}
-        <h1>{{ item.name }}</h1>
-        <p>価格: {{ item.price }}</p>
-        <p>個数 {{ item.quantity }}</p>
-        <p>小計 {{ item.subtotal }}円</p>
+      {% for cart_item in cart %}
+        <h1>{{ cart_item.item.name }}</h1>
+        {% if cart_item.image_url %}
+          <img src="{{ cart_item.image_url }}" alt="{{ cart_item.item.name }}" width="200">
+        {% else %}
+          <p>イメージ画像はありません。</p>
+        {% endif %}
+        <p>価格: {{ cart_item.item.price }}</p>
+        <p>個数 {{ cart_item.quantity }}</p>
+        <p>小計 {{ cart_item.subtotal }}円</p>
       {% endfor %}
         <p>合計金額: {{ total_price }}円</p>
 {% else %}

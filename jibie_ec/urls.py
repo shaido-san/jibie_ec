@@ -19,8 +19,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 # baseアプリのURLをプロジェクトに統合
 from django.urls import path, include
+from django.shortcuts import redirect
+
+def redirect_to_index(request):
+    return redirect("index")
 
 urlpatterns = [
+    path("", redirect_to_index, name="home"),
     path('admin/', admin.site.urls),
     path('', include('base.urls')),
 ]
