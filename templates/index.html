@@ -6,6 +6,14 @@
     <title>商品一覧ページ</title>
 </head>
 <body>
+    <header>
+        {% if user.is_authenticated %}
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">ログアウトする</button>
+          </form>
+        {% endif %}
+    </header>
     <h1>商品一覧</h1>
     <ul>
         {% for item in items %}

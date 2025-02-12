@@ -15,16 +15,23 @@
     {% else %}
       <p>イメージ画像はありません</p>
     {% endif %}
-    <p>在庫数:残り約{{ item.stock }}個</p>
-    {% if item.stock > 0 %}
-      <form action="{% url 'add_to_cart' item.id %}">
+    <p>在庫数:残り約{{ item.get_stock }}個</p>
+    {% if item.get_stock > 0 %}
+      <form action="{% url 'add_to_cart' item.id %}" method="post">
+        {% csrf_token %}
+        <label for="quantity">数量:</label>
+        <select name="quantity" id="quantity">
+            {% for i in stock_item_range %}
+              <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
         <button type="submit">カートに追加する</button>
       </form>
     {% else %}
-      <p>在庫がありません。入荷までもう少々お待ちください。</p>
+      <p>在庫がありません。入荷まで、もう少々お待ちください。</p>
     {% endif %}
 
-    <a href="/cart/">カートを見る</a>
+    <a href="/cart/">カートの中身を見る</a>
     <a href="/index/">商品一覧ページに戻る</a>
 </body>
 </html>

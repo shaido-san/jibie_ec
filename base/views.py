@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm
 from .models import Item, Cart
 from django.db import transaction
@@ -24,27 +25,38 @@ class CustomLoginView(LoginView):
 class CustomLogoutView(LogoutView):
     next_page = "login"
 
+@login_required
 def index(request):
     items = Item.objects.all()
     return render(request, "index.html", {"items": items})
 
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    return render(request, "item_detail.html", {"item": item})
+    stock_item_range = range(1, item.get_stock() + 1)
+    return render(request, "item_detail.html", {"item": item, "stock_item_range":stock_item_range})
 
 def cart(request):
-    cart = request.session.get("cart", {})
+    user = request.user
+    cart_items = Cart.objects.filter(user=user)
 
-    # 各アイテムの小計を計算
-    for item_id, item in cart.items():
-        item["subtotal"] = item["price"] * item["quantity"]
-    total_price = sum(item["price"] * item["quantity"] for item in cart.values())
+    total_price = 0
+    cart_data = []
 
-    return render(request, "cart.html", {"cart": cart, "total_price": total_price})
-
+    for cart_item in cart_items:
+        image_url = cart_item.item.image.url if cart_item.item.image else None
+        subtotal = cart_item.item.price * cart_item.quantity
+        cart_data.append({
+            "item":cart_item.item,
+            "image_url": image_url,
+            "quantity": cart_item.quantity,
+            "subtotal": subtotal
+        })
+        total_price += subtotal
+    return render(request, "cart.html", {"cart": cart_data, "total_price":total_price})
+    
 def add_to_cart(request, item_id):
 
-# 辞書型の中の辞書の構造になっている。例が下
+# 辞書型の中の辞書の構造になっている。例が下になる。また、ここではカートに商品を入れた時に、まだStockテーブルの更新は行わない。
 #     cart = {
 #     "1": {
 #         "name": "鹿肉セット",
@@ -58,27 +70,27 @@ def add_to_cart(request, item_id):
 #     }
 # }
     item = get_object_or_404(Item, id=item_id)
+    user = request.user
 
-    # withの中でエラーが発生すると、すべての処理がキャンセルされ、データベースは元の状態に戻る
-    try:
-        with transaction.atomic():
-            if item.stock <= 0:
-                return redirect("item_detail", item_id=item.id)
-            
-            cart = request.session.get("cart", {})
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity", 1))
+        
+        # ここのget_stockはItemモデルに紐づいているStockテーブルのquantityを呼び出している。models.pyにメソッドがある。
+        available_stock = item.get_stock()
 
-            if str(item_id) in cart:
-                cart[str(item_id)]["quantity"] += 1
-            
-            else:
-                cart[str(item_id)] = {"name": item.name, "price": item.price, "quantity": 1}
-            
-            # セッションを更新
-            request.session["cart"] = cart
+        if quantity > available_stock:
+            print("申し訳ありません。在庫不足です。")
+            return redirect("item_detail", item_id=item.id)
+        
+        cart_item, created = Cart.objects.get_or_create(user=user, item=item, defaults={"quantity": 0})
 
-            return redirect("cart")
+        if cart_item.quantity + quantity <= available_stock:
+            cart_item.quantity += quantity
+            cart_item.save()
+        else:
+            print("カート内の数量が在庫を超過しているため、追加できません。")
     
-    except Exception as e:
-        print("エラー:", e)
-        return redirect("item_detail", item_id=item.id)
+    return redirect("cart")
+    
+
     
