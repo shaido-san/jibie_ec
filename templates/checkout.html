@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注文確認ページ</title>
+</head>
+<body>
+    <h1>カートの内容</h1>
+    {% for cart_item in cart_items %}
+      <p>{{ cart_item.item.name }} - {{ cart_item.quantity }}個 - {{ cart_item.item.tax_price }}円(税込)</p>
+    {% endfor %}
+
+    <h2>送付先を選択</h2>
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if address %}
+          <h3>登録済みの住所</h3>
+            {% for address in addresses %}
+              <input type="radio" name="address_id" value="{{ address.id }}"> {{ adddress.name}} - {{ address.address}}<br>
+            {% endfor %}
+        {% endif %}
+
+        <h4>新しい住所を登録する</h4>
+        {{ form.as_p }}
+
+        <button type="cubmit">注文を確定する</button>
+    </form>
+
+    <a href="{% url 'cart' %}">カートに戻る</a>
+</body>
+</html>

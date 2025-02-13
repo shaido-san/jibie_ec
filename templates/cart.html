@@ -14,9 +14,10 @@
         {% else %}
           <p>イメージ画像はありません。</p>
         {% endif %}
-        <p>価格: {{ cart_item.item.price }}</p>
-        <p>個数 {{ cart_item.quantity }}</p>
-        <p>小計 {{ cart_item.subtotal }}円</p>
+        <p>価格: {{ cart_item.item.tax_price }}円(税込)</p>
+        <p>個数: {{ cart_item.quantity }}</p>
+        <p>小計: {{ cart_item.subtotal }}円</p>
+        <a href="{% url 'remove_from_cart' cart_item.item.id %}">商品をカートから削除する</a>
       {% endfor %}
         <p>合計金額: {{ total_price }}円</p>
 {% else %}

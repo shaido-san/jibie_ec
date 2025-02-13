@@ -6,9 +6,18 @@
     <title>商品詳細ページ</title>
 </head>
 <body>
+    {% if messages %}
+      <ul>
+      {% for message in messages %}
+        <li>
+            {{ message }}
+        </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
     <h1>商品一覧</h1>
     <h2>{{ item.name }}</h2>
-    <p>価格: {{ item.price }}円</p>
+    <p>価格: {{ item.tax_price }}円(税込)</p>
     <p>説明: {{ item.information }}</p>
     {% if item.image %}
       <img src="{{ item.image.url }}" alt="{{ item.name}}" width="200">
