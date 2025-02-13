@@ -19,7 +19,7 @@
         {% for item in items %}
           <li>
             <h2>{{ item.name }}</h2>
-            <h3>価格:{{ item.price }}円</h3>
+            <h3>価格:{{ item.tax_price }}円(税込)</h3>
             {% if item.image %}
               <img src="{{ item.image.url }}" alt="{{ item.name}}" width="200">
             {% else %}
