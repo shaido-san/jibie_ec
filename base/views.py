@@ -47,13 +47,13 @@ def cart(request):
     for cart_item in cart_items:
         image_url = cart_item.item.image.url if cart_item.item.image else None
         subtotal = cart_item.item.tax_price() * cart_item.quantity
+        total_price += subtotal
         cart_data.append({
             "item":cart_item.item,
             "image_url": image_url,
             "quantity": cart_item.quantity,
             "subtotal": subtotal
         })
-        total_price += subtotal
     return render(request, "cart.html", {"cart": cart_data, "total_price":total_price})
 
 @login_required   
@@ -131,32 +131,46 @@ def checkout(request):
     user = request.user
     cart_items = Cart.objects.filter(user=user)
     
-    if not cart_item.exists():
-        messages.error("カートは空です")
+    if not cart_items.exists():
+        messages.error(request, "カートは空です")
         return redirect("cart")
     
     addresses = Address.objects.filter(user=user)
     form = AddressForm(request.POST or None)
+    total_price = sum(cart_item.item.tax_price() * cart_item.quantity for cart_item in cart_items)
 
     if request.method == "POST":
         address_id = request.POST.get("address_id")
+        address = None
+
         if address_id:
-            address = Address.objects.get(id=address_id, user=user)
-        elif form.is_valid():
+            try:
+                address = Address.objects.get(id=address_id, user=user)
+            except Address.DoesNotExist:
+                messages.error(request, "住所がありません")
+                
+        elif request.POST.get("post_code") and form.is_valid():
             address = form.save(commit=False)
             address.user = user
             address.save()
-        else:
-            messages.error(request, "住所を入力してください")
-            return render(request, "checkout.html", {"cart_items": cart_item, "address": address, "form": form})
-        
+
+        if address is None:
+            messages.error(request, "既存の住所を選択するか、新しい住所を入力してください。")
+            return render(request, "checkout.html", {
+                "cart_items": cart_items, 
+                "addresses": addresses, 
+                "form": form, 
+                "total_price": total_price
+            })
+
         with transaction.atomic():
             order = Order.objects.create(user=user, address=address, total_price=0)
 
             total_price = 0
             for cart_item in cart_items:
-                subtotal = cart_items.item.tax_price() * cart_item.quantity
+                subtotal = cart_item.item.tax_price() * cart_item.quantity
                 OrderItem.objects.create(order=order, item=cart_item.item, quantity=cart_item.quantity, subtotal_price=subtotal)
+
                 total_price += subtotal
         
             order.total_price = total_price
@@ -167,7 +181,7 @@ def checkout(request):
         messages.success(request, "注文が確定しました")
         return redirect("index")
 
-    return render(request, "checkout.html", {"cart_items":cart_items, "addresses": addresses, "form":form})
+    return render(request, "checkout.html", {"cart_items":cart_items, "addresses": addresses, "form":form, "total_price":total_price})
 
 
     

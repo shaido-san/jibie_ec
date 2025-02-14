@@ -49,7 +49,7 @@ class Item(models.Model):
         return stock_entry.quantity if stock_entry else 0
     
     def tax_price(self):
-        return int(self.price * 1.10)
+        return int(self.price * 1.1)
 
 class Stock(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)

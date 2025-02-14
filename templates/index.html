@@ -13,6 +13,13 @@
             <button type="submit">ログアウトする</button>
           </form>
         {% endif %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul> 
+        {% endif %}
     </header>
     <h1>商品一覧</h1>
     <ul>

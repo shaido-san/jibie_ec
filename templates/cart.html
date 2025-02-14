@@ -6,6 +6,15 @@
     <title>カートページ</title>
 </head>
 <body>
+    {% if messages %}
+    <ul>
+    {% for message in messages %}
+      <li>
+          {{ message }}
+      </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
 {% if cart %}
       {% for cart_item in cart %}
         <h1>{{ cart_item.item.name }}</h1>
@@ -19,7 +28,10 @@
         <p>小計: {{ cart_item.subtotal }}円</p>
         <a href="{% url 'remove_from_cart' cart_item.item.id %}">商品をカートから削除する</a>
       {% endfor %}
-        <p>合計金額: {{ total_price }}円</p>
+      <hr>
+        <h2>合計金額: {{ total_price }}円</h2>
+
+        <a href="{% url 'checkout' %}">注文を確定する</a>
 {% else %}
       <h1>カートに商品がありません</h1>
 {% endif %}
