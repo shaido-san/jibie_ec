@@ -14,31 +14,24 @@
     <h2>合計金額: {{ total_price }}円(税込)</h2>
 
     <h2>送付先を選択</h2>
-    <form method="POST">
-        {% csrf_token %}
+<form method="POST">
+    {% csrf_token %}
 
-        {% if addresses %}
-          <h3>登録済みの住所</h3>
-            {% for address in addresses %}
-              <label>
-                <input type="radio" name="address_id" value="{{ address.id }}" required> 
-                〒{{ address.post_code }} {{ address.address }}（{{ address.name }} - {{ address.telephone_number }}）
-              </label><br>
-            {% endfor %}
-        {% endif %}
+    {% if addresses %}
+      <h3>登録済みの住所</h3>
+        {% for address in addresses %}
+          <label>
+            <input type="radio" name="address_id" value="{{ address.id }}"> 
+            〒{{ address.post_code }} {{ address.address }}（{{ address.name }} - {{ address.telephone_number }}）
+          </label><br>
+        {% endfor %}
+    {% else %}
+        <p>住所が登録されていません。 <a href="{% url 'manage_addresses' %}">住所を登録する</a></p>
+    {% endif %}
 
-        <h4>新しい住所を登録する</h4>
-        <label>
-            <input type="radio" name="address_id" value="new" required> 新しい住所を登録
-        </label>
-
-        <div id="new_address_fields">
-            {{ form.as_p }}
-        </div>
-
-        <button type="submit">注文を確定する</button>
-    </form>
-
+    <button type="submit">注文を確定する</button>
+</form>
+        
     <a href="{% url 'cart' %}">カートに戻る</a>
 </body>
 </html>
