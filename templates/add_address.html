@@ -1,0 +1,16 @@
+<h1>住所登録</h1>
+
+{% for address in addresses %}
+    <p>〒{{ address.post_code }} {{ address.address }}（{{ address.name }} - {{ address.telephone_number }}）</p>
+{% empty %}
+    <p>登録された住所はありません。</p>
+{% endfor %}
+
+<h2>新しい住所を登録</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">登録する</button>
+</form>
+
+<a href="{% url 'cart' %}">カートに戻る</a>

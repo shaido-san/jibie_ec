@@ -127,61 +127,64 @@ def add_address(request):
         return render(request, "add_address.html", {"form": form})
 
 @login_required
+@login_required
 def checkout(request):
     user = request.user
     cart_items = Cart.objects.filter(user=user)
-    
+
+    # カートが空ならリダイレクト
     if not cart_items.exists():
         messages.error(request, "カートは空です")
         return redirect("cart")
-    
-    addresses = Address.objects.filter(user=user)
-    form = AddressForm(request.POST or None)
+
+    addresses = Address.objects.filter(user=user)  # ユーザーの登録済み住所
+
     total_price = sum(cart_item.item.tax_price() * cart_item.quantity for cart_item in cart_items)
 
     if request.method == "POST":
         address_id = request.POST.get("address_id")
-        address = None
 
-        if address_id:
-            try:
-                address = Address.objects.get(id=address_id, user=user)
-            except Address.DoesNotExist:
-                messages.error(request, "住所がありません")
-                
-        elif request.POST.get("post_code") and form.is_valid():
-            address = form.save(commit=False)
-            address.user = user
-            address.save()
+        # 住所が選択されているかチェック
+        if not address_id:
+            messages.error(request, "送付先の住所を選択してください")
+            return render(request, "checkout.html", {"cart_items": cart_items, "addresses": addresses, "total_price": total_price})
 
-        if address is None:
-            messages.error(request, "既存の住所を選択するか、新しい住所を入力してください。")
-            return render(request, "checkout.html", {
-                "cart_items": cart_items, 
-                "addresses": addresses, 
-                "form": form, 
-                "total_price": total_price
-            })
+        address = get_object_or_404(Address, id=address_id, user=user)
 
+        # ✅ 注文確定処理
         with transaction.atomic():
-            order = Order.objects.create(user=user, address=address, total_price=0)
+            order = Order.objects.create(user=user, address=address, total_price=total_price)
 
-            total_price = 0
             for cart_item in cart_items:
-                subtotal = cart_item.item.tax_price() * cart_item.quantity
-                OrderItem.objects.create(order=order, item=cart_item.item, quantity=cart_item.quantity, subtotal_price=subtotal)
+                OrderItem.objects.create(
+                    order=order,
+                    item=cart_item.item,
+                    quantity=cart_item.quantity,
+                    subtotal_price=cart_item.item.tax_price() * cart_item.quantity
+                )
 
-                total_price += subtotal
-        
-            order.total_price = total_price
-            order.save()
+            cart_items.delete()  # ✅ カートの中身を削除
 
-            cart_items.delete()
-    
         messages.success(request, "注文が確定しました")
         return redirect("index")
 
-    return render(request, "checkout.html", {"cart_items":cart_items, "addresses": addresses, "form":form, "total_price":total_price})
+    return render(request, "checkout.html", {"cart_items": cart_items, "addresses": addresses, "total_price": total_price})
 
+@login_required
+def add_address(request):
+    user = request.user
+    address = Address.objects.filter(user=user)
 
+    if request.method == "POST":
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = user
+            address.save()
+            messages.success(request, "住所登録しました")
+            return redirect("add_address")
     
+    else:
+        form = AddressForm()
+    
+    return render(request, "add_address.html")
