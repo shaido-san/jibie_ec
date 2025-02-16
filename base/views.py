@@ -110,21 +110,7 @@ def remove_from_cart(request, item_id):
     messages.success(request, "カートから商品を削除しました")
     return redirect("cart")
 
-@login_required
-def add_address(request):
-    if request.method == "POST":
-        form = AddressForm(request.POST)
-        if form.is_valid():
-            address = form.save(commit=False)
-            address.user = request.user
-            address.save()
-            messages.success(request, "住所を登録しました。")
-            return redirect("checkout")
-        
-        else:
-            form = AddressForm()
-        
-        return render(request, "add_address.html", {"form": form})
+
 
 @login_required
 @login_required
@@ -173,7 +159,6 @@ def checkout(request):
 @login_required
 def add_address(request):
     user = request.user
-    address = Address.objects.filter(user=user)
 
     if request.method == "POST":
         form = AddressForm(request.POST)
@@ -182,9 +167,10 @@ def add_address(request):
             address.user = user
             address.save()
             messages.success(request, "住所登録しました")
-            return redirect("add_address")
+            return redirect("checkout")
     
     else:
         form = AddressForm()
     
-    return render(request, "add_address.html")
+    return render(request, "add_address.html", {"form": form})
+

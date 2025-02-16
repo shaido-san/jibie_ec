@@ -14,6 +14,7 @@
     <h2>合計金額: {{ total_price }}円(税込)</h2>
 
     <h2>送付先を選択</h2>
+    <p><a href="{% url 'add_address' %}">新しい住所を登録する</a></p>
 <form method="POST">
     {% csrf_token %}
 
