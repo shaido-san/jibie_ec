@@ -118,7 +118,7 @@ def checkout(request):
     user = request.user
     cart_items = Cart.objects.filter(user=user)
 
-    # カートが空ならリダイレクト
+    # カートが空ならcart.htmlにリダイレクト
     if not cart_items.exists():
         messages.error(request, "カートは空です")
         return redirect("cart")
@@ -137,7 +137,24 @@ def checkout(request):
 
         address = get_object_or_404(Address, id=address_id, user=user)
 
-        # ✅ 注文確定処理
+        # 在庫をチェック（他のユーザーが購入すると在庫数が減るため）
+        not_stock_items = []
+        for cart_item in cart_items:
+            stock_entry = Stock.objects.get(item=cart_item.item)
+
+            # 在庫数とカートの個数を比較して、少なかったらnot_stock_itemsに入れる
+            if stock_entry.quantity < cart_item.quantity:
+                not_stock_items.append(cart_item)
+        
+        # 在庫が不足している商品があれば、削除してエラーメッセージを表示する
+        if not_stock_items:
+            for item in not_stock_items:
+                item.delete()
+            
+            messages.error(request, "在庫が足りない商品がございました。やり直してください。")
+            return redirect("cart")
+
+        # 注文確定処理
         with transaction.atomic():
             order = Order.objects.create(user=user, address=address, total_price=total_price)
 
@@ -149,7 +166,7 @@ def checkout(request):
                     subtotal_price=cart_item.item.tax_price() * cart_item.quantity
                 )
 
-            cart_items.delete()  # ✅ カートの中身を削除
+            cart_items.delete()  # カートの中身を削除
 
         messages.success(request, "注文が確定しました")
         return redirect("index")
