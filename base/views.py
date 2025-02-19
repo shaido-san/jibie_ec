@@ -165,7 +165,10 @@ def checkout(request):
                     quantity=cart_item.quantity,
                     subtotal_price=cart_item.item.tax_price() * cart_item.quantity
                 )
-
+            
+            stock_entry = Stock.objects.get(item=cart_item.item)
+            stock_entry.quantity -= cart_item.quantity
+            stock_entry.save()
             cart_items.delete()  # カートの中身を削除
 
         messages.success(request, "注文が確定しました")
