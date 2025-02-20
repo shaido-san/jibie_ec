@@ -14,3 +14,4 @@ media/
 # IDE関連
 .vscode/
 .idea/
+.env
