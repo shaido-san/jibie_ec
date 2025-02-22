@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注文完了</title>
+</head>
+<body>
+    <h1>注文が確定しました！</h1>
+    <p>ご注文ありがとうございます。</p>
+
+    <h2>注文情報</h2>
+    <p>注文番号: {{ order.id }}</p>
+    <p>合計金額: {{ order.total_price }}円（税込）</p>
+    <p>配送先: {{ order.address.post_code }} {{ order.address.address }} ({{ order.address.name }})</p>
+
+    <h2>ご注文商品</h2>
+    <ul>
+        {% for item in order.orderitem_set.all %}
+            <li>{{ item.item.name }} - {{ item.quantity }}個 - {{ item.subtotal_price }}円</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'order_history' %}">注文履歴を見る</a>
+    <a href="{% url 'index' %}">トップページへ戻る</a>
+</body>
+</html>

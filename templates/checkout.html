@@ -27,10 +27,10 @@
           </label><br>
         {% endfor %}
     {% else %}
-        <p>住所が登録されていません。 <a href="{% url 'manage_addresses' %}">住所を登録する</a></p>
+        <p>住所が登録されていません。 <a href="{% url 'add_address' %}">住所を登録する</a></p>
     {% endif %}
 
-    <button type="submit">注文を確定する</button>
+    <button type="submit">決済画面へ進む</button>
 </form>
         
     <a href="{% url 'cart' %}">カートに戻る</a>
