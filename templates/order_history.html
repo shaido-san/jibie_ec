@@ -17,17 +17,31 @@
     <h1>注文が確定しました！</h1>
     <p>ご注文ありがとうございます。</p>
 
-    <h2>注文情報</h2>
-    <p>注文番号: {{ order.id }}</p>
-    <p>合計金額: {{ order.total_price }}円（税込）</p>
-    <p>配送先: {{ order.address.post_code }} {{ order.address.address }} ({{ order.address.name }})</p>
+    {% if order %}
+        <h2>注文情報</h2>
+        <p>注文番号: {{ order.id }}</p>
+        <p>合計金額: {{ order.total_price|default:"0" }}円（税込）</p>
+        <p>配送先:
+            {% if order.address %}
+                {{ order.address.post_code }} {{ order.address.address }} ({{ order.address.name }})
+            {% else %}
+                未設定
+            {% endif %}
+        </p>
 
-    <h2>ご注文商品</h2>
-    <ul>
-        {% for item in order.orderitem_set.all %}
-            <li>{{ item.item.name }} - {{ item.quantity }}個 - {{ item.subtotal_price }}円</li>
-        {% endfor %}
-    </ul>
+        <h2>ご注文商品</h2>
+        {% if order.orderitem_set.exists %}
+            <ul>
+                {% for item in order.orderitem_set.all %}
+                    <li>{{ item.item.name }} - {{ item.quantity }}個 - {{ item.subtotal_price|default:"0" }}円</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>注文商品がありません。</p>
+        {% endif %}
+    {% else %}
+        <p>注文情報が見つかりません。</p>
+    {% endif %}
 
     <a href="{% url 'order_history' %}">注文履歴を見る</a>
     <a href="{% url 'index' %}">トップページへ戻る</a>
