@@ -228,26 +228,28 @@ def success(request):
     if not_stock_items:
         messages.error(request, "在庫不足です。やり直しをお願いします。")
         return redirect("cart")
-    
-    # 注文を確定する。注文ーブルを作り、在庫を減らす処理。
-    with transaction.atomic():
-        order = Order.objects.create(user=user, address=address, total_price=total_price)
-
-        for cart_item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                item=cart_item.item,
-                quantity=cart_item.quantity,
-                subtotal_price=cart_item.item.tax_price() * cart_item.quantity
-            )
-
-            # ここで在庫を減らす。
-            stock_entry = Stock.objects.get(item=cart_item.item)
-            stock_entry.quantity -= cart_item.quantity
-            stock_entry.save()
+    try:
+        # 注文を確定する。注文ーブルを作り、在庫を減らす処理。
+         with transaction.atomic():
+             order = Order.objects.create(user=user, address=address, total_price=total_price)
+             for cart_item in cart_items:
+                 OrderItem.objects.create(
+                 order=order,
+                 item=cart_item.item,
+                 quantity=cart_item.quantity,
+                 subtotal_price=cart_item.item.tax_price() * cart_item.quantity
+                 )
+                 # ここで在庫を減らす。
+                 stock_entry = Stock.objects.get(item=cart_item.item)
+                 stock_entry.quantity -= cart_item.quantity
+                 stock_entry.save()
         
-        # 注文を確定後にカートの中身を削除する。逆ではダメ
-        cart_items.delete()
+             # 注文を確定後にカートの中身を削除する。逆ではダメ
+             cart_items.delete()
+    
+    except Exception as e:
+        messages.error(request, "注文処理中にエラーが発生しました")
+        return redirect("cart")
     
     messages.success(request, "ご注文ありがとうございます。注文が確定しました。")
     return render(request, "success.html",{"order":order})
