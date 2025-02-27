@@ -77,6 +77,9 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
+    def __str__(self):
+        return f"注文 {self.id} - {self.user.username} - {self.created_at.strftime('%Y-%m-%d')}"
+
 # 注文商品情報
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
