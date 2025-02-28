@@ -10,9 +10,10 @@ env/
 # Django関連
 db.sqlite3
 media/
-jibie_ec/settings.py
 
 # IDE関連
 .vscode/
 .idea/
+
+# 環境変数
 .env
